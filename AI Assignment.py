@@ -54,7 +54,7 @@ def move_up_left(coordinate):
     x, y, z = coordinate
     return (x-1, y+1, z)
     
-def expandAndReturnChildren(state_space, node, goal_state):
+def expand_and_return_children(state_space, node, goal_state):
     children = []
     
     available_actions = [
@@ -83,23 +83,23 @@ def expandAndReturnChildren(state_space, node, goal_state):
     return children
     # return [str(child) for child in children]     
 
-def appendAndSort(frontier, leaf_node):
+def append_and_sort(frontier, node):
     # Flag to indicate if the leaf node replaces a previous node
     replaced = False
     
     # Check if the current node has been expanded previously
     for (i,f) in enumerate(frontier):
-        if f.coordinate == leaf_node.coordinate:
-            if f.f > leaf_node.f:
+        if f.coordinate == node.coordinate:
+            if f.f > node.f:
                 # Replace the existing node with the current node which has lower cost
-                frontier[i] = leaf_node
+                frontier[i] = node
                 replaced = True
             else:
                 return frontier
     
     # If the frontier has not been replaced with the leaf node, append the leaf node
     if not replaced:
-        frontier.append(leaf_node)
+        frontier.append(node)
     
     # Sort the frontier based on their f value
     sorted_frontier = sorted(frontier, key=lambda x: (x.f, -x.g))
@@ -116,9 +116,9 @@ def a_star(state_space, initial_state, goal_state):
     rubbish_weight_volume = [0,0]
 
     frontier.append(Node(initial_state[0], initial_state[1], initial_state[2], None, 0, calculate_g(initial_state, initial_state), calculate_h(initial_state, goal_state)))
-    #print(frontier[0])
 
     while not found_goal:
+        # Goal Test
         if frontier[0].coordinate == goal_state[0]:
             found_goal = True
             goal = frontier[0]
@@ -127,7 +127,7 @@ def a_star(state_space, initial_state, goal_state):
                 rubbish_weight_volume = frontier[0].rubbish_weight_volume
             break
     
-        children = expandAndReturnChildren(state_space, frontier[0], state_space[6])
+        children = expand_and_return_children(state_space, frontier[0], goal_state)
         
         frontier[0].add_children(children)
         explored.append(frontier[0])
@@ -136,7 +136,7 @@ def a_star(state_space, initial_state, goal_state):
         
         for child in children:
             if not (child.coordinate in [state.coordinate for state in explored]):
-                frontier = appendAndSort(frontier, child)
+                frontier = append_and_sort(frontier, child)
         
         print("Explored: ", [str(explored) for explored in explored], "\n")
         print("Children: ", [str(child) for child in children], "\n")
@@ -157,7 +157,7 @@ def a_star(state_space, initial_state, goal_state):
 if __name__ == '__main__':    
 
     state_space = [
-        # Coordinate, Rubbish Weight, Rubbish Volume, IsDisposalRoom
+        # Coordinate, Rubbish Weight + Rubbish Volume, IsDisposalRoom
         [(0, 0, 0), (0, 0), False],
         [(0, -1, 1), (0, 0), False],
         [(1, -1, 0), (0, 0), False],
