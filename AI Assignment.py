@@ -15,20 +15,14 @@ class Node():
 
     def add_children(self, children):
         self.children.extend(children)
-        
-def calculate_g(initial_state, current_state):
-    x1, y1, z1 = initial_state[0]
-    x2, y2, z2 = current_state[0]
-    
-    g_value = max(abs(x2 - x1), abs(y2 - y1), abs(z2 - z1))
-    return g_value
 
-def calculate_h(current_state, goal_state):
-    x1, y1, z1 = current_state[0]
-    x2, y2, z2 = goal_state[0]
+# Function to calculate distance
+def calculate_distance(state1, state2):
+    x1, y1, z1 = state1[0]
+    x2, y2, z2 = state2[0]
     
-    h_value = max(abs(x2 - x1), abs(y2 - y1), abs(z2 - z1))
-    return h_value
+    distance = max(abs(x2 - x1), abs(y2 - y1), abs(z2 - z1))
+    return distance
 
 def move_up(coordinate):
     x, y, z = coordinate
@@ -78,7 +72,7 @@ def expand_and_return_children(state_space, node, goal_state):
     for i, state in enumerate(state_space):
         if state[0] in available_actions:
             #print(state)
-            children.append(Node(state[0], state[1], state[2], node, 0, calculate_g(initial_state, state), calculate_h(state, goal_state)))
+            children.append(Node(state[0], state[1], state[2], node, 0, calculate_distance(initial_state, state), calculate_distance(state, goal_state)))
 
     return children
     # return [str(child) for child in children]     
@@ -115,7 +109,7 @@ def a_star(state_space, initial_state, goal_state):
     cost = 0
     rubbish_weight_volume = [0,0]
 
-    frontier.append(Node(initial_state[0], initial_state[1], initial_state[2], None, 0, calculate_g(initial_state, initial_state), calculate_h(initial_state, goal_state)))
+    frontier.append(Node(initial_state[0], initial_state[1], initial_state[2], None, 0, calculate_distance(initial_state, initial_state), calculate_distance(initial_state, goal_state)))
 
     while not found_goal:
         # Goal Test
@@ -152,6 +146,7 @@ def a_star(state_space, initial_state, goal_state):
             if e.coordinate == goal.parent.coordinate:
                 goal = e
                 break
+            
     return path, cost, rubbish_weight_volume
     
 if __name__ == '__main__':    
